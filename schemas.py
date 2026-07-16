@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from datetime import datetime
 from typing import Optional
 
 
@@ -7,16 +6,14 @@ from typing import Optional
 class BookCreate(BaseModel):
     title: str
     author: str
-    description: Optional[str] = None
-    price: Optional[float] = None
+    published_year: Optional[int] = None
 
 
 # 更新書籍時的請求格式（所有欄位可選）
 class BookUpdate(BaseModel):
     title: Optional[str] = None
     author: Optional[str] = None
-    description: Optional[str] = None
-    price: Optional[float] = None
+    published_year: Optional[int] = None
 
 
 # 回傳給客戶端的格式
@@ -24,9 +21,7 @@ class BookResponse(BaseModel):
     id: int
     title: str
     author: str
-    description: Optional[str] = None
-    price: Optional[float] = None
-    created_at: datetime
+    published_year: Optional[int] = None
 
     class Config:
         from_attributes = True

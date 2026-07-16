@@ -12,6 +12,12 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Book CRUD API")
 
 
+# ── Hello ─────────────────────────────────────────────────
+@app.get("/")
+def hello():
+    return {"message": "Hello"}
+
+
 # ── Create ────────────────────────────────────────────────
 @app.post("/books", response_model=schemas.BookResponse, status_code=201)
 def create_book(book: schemas.BookCreate, db: Session = Depends(get_db)):
@@ -24,7 +30,7 @@ def create_book(book: schemas.BookCreate, db: Session = Depends(get_db)):
 
 # ── Read All ──────────────────────────────────────────────
 @app.get("/books", response_model=List[schemas.BookResponse])
-def get_books(db: Session = Depends(get_db)):
+def list_books(db: Session = Depends(get_db)):
     return db.query(models.Book).all()
 
 
