@@ -10,6 +10,8 @@ class UserCreate(BaseModel):
     email: str
     password: str
     phone: Optional[str] = None
+    role: Optional[str] = "consumer"
+
 
 
 class UserResponse(BaseModel):

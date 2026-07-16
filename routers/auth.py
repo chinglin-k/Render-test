@@ -17,12 +17,13 @@ def register(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
 
+    role = user_in.role if user_in.role in ("consumer", "restaurant", "admin") else "consumer"
     user = models.User(
         name=user_in.name,
         email=user_in.email,
         password_hash=hash_password(user_in.password),
         phone=user_in.phone,
-        role="consumer",
+        role=role,
     )
     db.add(user)
     db.commit()

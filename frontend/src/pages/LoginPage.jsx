@@ -9,6 +9,7 @@ export default function LoginPage({ onLogin }) {
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
+  const [role, setRole] = useState('consumer')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -34,7 +35,7 @@ export default function LoginPage({ onLogin }) {
     setError('')
     setLoading(true)
     try {
-      await register(name, email, password, phone)
+      await register(name, email, password, phone, role)
       const response = await login(email, password)
       setToken(response.access_token)
       setUser(response.user)
@@ -260,6 +261,18 @@ export default function LoginPage({ onLogin }) {
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="選填"
                   />
+                </div>
+                <div className="login-form-group">
+                  <label>身份別</label>
+                  <select
+                    className="login-input"
+                    value={role}
+                    onChange={(e) => setRole(e.target.value)}
+                  >
+                    <option value="consumer">消費者 (Consumer)</option>
+                    <option value="restaurant">餐廳端 (Restaurant)</option>
+                    <option value="admin">管理員 (Admin)</option>
+                  </select>
                 </div>
                 <button className="login-btn" type="submit" disabled={loading}>
                   {loading ? '註冊中...' : '註冊'}
