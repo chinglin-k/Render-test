@@ -194,7 +194,7 @@ export default function LoginPage({ onLogin }) {
                   <label>電子郵件</label>
                   <input
                     className="login-input"
-                    type="email"
+                    type="text"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="請輸入電子郵件"
@@ -233,7 +233,7 @@ export default function LoginPage({ onLogin }) {
                   <label>電子郵件</label>
                   <input
                     className="login-input"
-                    type="email"
+                    type="text"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="請輸入電子郵件"
