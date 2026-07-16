@@ -622,9 +622,9 @@ export default function AdminPage() {
                             value={u.role}
                             onChange={(e) => handleRoleChange(u.id, e.target.value)}
                           >
-                            <option value="customer">customer</option>
+                            <option value="consumer">consumer</option>
                             <option value="admin">admin</option>
-                            <option value="delivery">delivery</option>
+                            <option value="restaurant">restaurant</option>
                           </select>
                         </td>
                       </tr>
