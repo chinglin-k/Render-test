@@ -196,3 +196,14 @@
 **限制：** 正式上線應限縮 allow_origins 為 GitHub Pages 域名。
 
 **影響範圍：** `main.py`
+
+---
+
+### [2026-07-16] 部署與前端 Bug 修復記錄
+
+**記錄：**
+1. **API URL 修正**：將原先佔位的 `book-crud-api` 替換為實際的 Render URL (`render-test-ae9w.onrender.com`)。
+2. **自動資料庫遷移**：Render 上的舊資料庫缺少 `users.is_active` 欄位導致啟動崩潰。在 `main.py` 的 `seed_data` 中加入了 `ALTER TABLE` 的錯誤捕捉與自動執行邏輯，解決啟動崩潰問題。
+3. **前端登入類型修正**：將登入帳號欄位由 `type="email"` 改為 `type="text"`，允許使用如 `test` 這樣的非標準 email 格式登入而不被瀏覽器阻擋。
+4. **前端角色選單修正**：修正管理後台 (`AdminPage.jsx`) 修改使用者角色時的選項，從錯誤的 `customer` / `delivery` 修正為後端規範的 `consumer` / `restaurant` / `admin`。
+5. **CSS 亂碼修復**：修復了 `index.css` 結尾的隱藏 null bytes 導致 GitHub Actions 的 Vite (PostCSS) build 失敗的問題。
