@@ -18,6 +18,7 @@ class UserResponse(BaseModel):
     email: str
     role: str
     phone: Optional[str] = None
+    is_active: bool
     created_at: datetime
 
     class Config:
@@ -171,3 +172,68 @@ class OrderResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# ─── Review（Phase 2）────────────────────────────────────────────────────────
+
+class ReviewCreate(BaseModel):
+    order_id: int
+    rating: int   # 1–5 星
+    comment: Optional[str] = None
+
+
+class ReviewResponse(BaseModel):
+    id: int
+    order_id: int
+    user_id: int
+    restaurant_id: int
+    rating: int
+    comment: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# ─── Coupon（Phase 2）────────────────────────────────────────────────────────
+
+class CouponCreate(BaseModel):
+    code: str
+    description: Optional[str] = None
+    discount_type: str          # "percentage" | "fixed"
+    discount_value: float       # 10 = 10% 或 50 = NT$50
+    min_order_amount: Optional[float] = 0
+    expires_at: Optional[datetime] = None
+
+
+class CouponUpdate(BaseModel):
+    description: Optional[str] = None
+    discount_type: Optional[str] = None
+    discount_value: Optional[float] = None
+    min_order_amount: Optional[float] = None
+    is_active: Optional[bool] = None
+    expires_at: Optional[datetime] = None
+
+
+class CouponResponse(BaseModel):
+    id: int
+    code: str
+    description: Optional[str] = None
+    discount_type: str
+    discount_value: float
+    min_order_amount: float
+    is_active: bool
+    expires_at: Optional[datetime] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class CouponValidateResponse(BaseModel):
+    valid: bool
+    code: str
+    discount_type: str
+    discount_value: float
+    min_order_amount: float
+    message: str

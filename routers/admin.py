@@ -59,7 +59,7 @@ def deactivate_restaurant(
     db: Session = Depends(get_db),
     _: models.User = Depends(require_admin),
 ):
-    """【管理員】停用餐廳"""
+    """【管理員】停用餐廳（軟刪除）"""
     r = db.query(models.Restaurant).filter(models.Restaurant.id == restaurant_id).first()
     if not r:
         raise HTTPException(status_code=404, detail="Restaurant not found")
@@ -155,10 +155,117 @@ def update_user_role(
 ):
     """【管理員】設定使用者角色（consumer / restaurant / admin）"""
     if role not in ("consumer", "restaurant", "admin"):
-        raise HTTPException(status_code=400, detail="Invalid role")
+        raise HTTPException(status_code=400, detail="Invalid role. Must be: consumer, restaurant, admin")
     user = db.query(models.User).filter(models.User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     user.role = role
     db.commit()
     return {"id": user_id, "role": role}
+
+
+@router.put("/users/{user_id}/deactivate", response_model=schemas.UserResponse)
+def deactivate_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    _: models.User = Depends(require_admin),
+):
+    """【管理員】停用使用者帳號"""
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.is_active = False
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+@router.put("/users/{user_id}/activate", response_model=schemas.UserResponse)
+def activate_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    _: models.User = Depends(require_admin),
+):
+    """【管理員】啟用使用者帳號"""
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    user.is_active = True
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+# ── Coupons ───────────────────────────────────────────────────────────────────
+
+@router.post("/coupons", response_model=schemas.CouponResponse, status_code=201)
+def create_coupon(
+    coupon_in: schemas.CouponCreate,
+    db: Session = Depends(get_db),
+    _: models.User = Depends(require_admin),
+):
+    """【管理員】新增優惠券"""
+    if coupon_in.discount_type not in ("percentage", "fixed"):
+        raise HTTPException(status_code=400, detail="discount_type must be 'percentage' or 'fixed'")
+    if coupon_in.discount_value <= 0:
+        raise HTTPException(status_code=400, detail="discount_value must be greater than 0")
+
+    existing = db.query(models.Coupon).filter(
+        models.Coupon.code == coupon_in.code.upper()
+    ).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Coupon code already exists")
+
+    coupon = models.Coupon(
+        code=coupon_in.code.upper(),
+        description=coupon_in.description,
+        discount_type=coupon_in.discount_type,
+        discount_value=coupon_in.discount_value,
+        min_order_amount=coupon_in.min_order_amount or 0,
+        expires_at=coupon_in.expires_at,
+    )
+    db.add(coupon)
+    db.commit()
+    db.refresh(coupon)
+    return coupon
+
+
+@router.get("/coupons", response_model=List[schemas.CouponResponse])
+def list_coupons(
+    db: Session = Depends(get_db),
+    _: models.User = Depends(require_admin),
+):
+    """【管理員】查詢所有優惠券"""
+    return db.query(models.Coupon).all()
+
+
+@router.put("/coupons/{coupon_id}", response_model=schemas.CouponResponse)
+def update_coupon(
+    coupon_id: int,
+    coupon_update: schemas.CouponUpdate,
+    db: Session = Depends(get_db),
+    _: models.User = Depends(require_admin),
+):
+    """【管理員】更新優惠券"""
+    coupon = db.query(models.Coupon).filter(models.Coupon.id == coupon_id).first()
+    if not coupon:
+        raise HTTPException(status_code=404, detail="Coupon not found")
+    for field, value in coupon_update.model_dump(exclude_unset=True).items():
+        setattr(coupon, field, value)
+    db.commit()
+    db.refresh(coupon)
+    return coupon
+
+
+@router.delete("/coupons/{coupon_id}", status_code=204)
+def delete_coupon(
+    coupon_id: int,
+    db: Session = Depends(get_db),
+    _: models.User = Depends(require_admin),
+):
+    """【管理員】刪除優惠券"""
+    coupon = db.query(models.Coupon).filter(models.Coupon.id == coupon_id).first()
+    if not coupon:
+        raise HTTPException(status_code=404, detail="Coupon not found")
+    db.delete(coupon)
+    db.commit()

@@ -13,11 +13,13 @@ class User(Base):
     password_hash = Column(String, nullable=False)
     role = Column(String, default="consumer")  # consumer | restaurant | admin
     phone = Column(String, nullable=True)
+    is_active = Column(Boolean, nullable=False, default=True)  # 帳號停用功能（需執行 migration.sql）
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     cart = relationship("Cart", back_populates="user", uselist=False, cascade="all, delete-orphan")
     orders = relationship("Order", back_populates="user")
     restaurants = relationship("Restaurant", back_populates="owner")
+    reviews = relationship("Review", back_populates="user")
 
 
 class Restaurant(Base):
@@ -36,6 +38,7 @@ class Restaurant(Base):
     categories = relationship("Category", back_populates="restaurant", cascade="all, delete-orphan")
     menu_items = relationship("MenuItem", back_populates="restaurant", cascade="all, delete-orphan")
     orders = relationship("Order", back_populates="restaurant")
+    reviews = relationship("Review", back_populates="restaurant")
 
 
 class Category(Base):
@@ -101,6 +104,7 @@ class Order(Base):
     user = relationship("User", back_populates="orders")
     restaurant = relationship("Restaurant", back_populates="orders")
     items = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
+    review = relationship("Review", back_populates="order", uselist=False)
 
 
 class OrderItem(Base):
@@ -114,3 +118,37 @@ class OrderItem(Base):
 
     order = relationship("Order", back_populates="items")
     menu_item = relationship("MenuItem")
+
+
+# ── Phase 2：評價 ──────────────────────────────────────────────────────────────
+
+class Review(Base):
+    __tablename__ = "reviews"
+
+    id = Column(Integer, primary_key=True, index=True)
+    order_id = Column(Integer, ForeignKey("orders.id"), unique=True, nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    restaurant_id = Column(Integer, ForeignKey("restaurants.id"), nullable=False)
+    rating = Column(Integer, nullable=False)  # 1–5 星
+    comment = Column(String, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    order = relationship("Order", back_populates="review")
+    user = relationship("User", back_populates="reviews")
+    restaurant = relationship("Restaurant", back_populates="reviews")
+
+
+# ── Phase 2：優惠券 ────────────────────────────────────────────────────────────
+
+class Coupon(Base):
+    __tablename__ = "coupons"
+
+    id = Column(Integer, primary_key=True, index=True)
+    code = Column(String(50), unique=True, nullable=False, index=True)
+    description = Column(String, nullable=True)
+    discount_type = Column(String(20), nullable=False)  # "percentage" | "fixed"
+    discount_value = Column(Float, nullable=False)      # 百分比（10=10%）或固定金額
+    min_order_amount = Column(Float, nullable=False, default=0)
+    is_active = Column(Boolean, nullable=False, default=True)
+    expires_at = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())

@@ -85,6 +85,27 @@ def get_order(
     return order
 
 
+@router.delete("/{order_id}", status_code=204)
+def cancel_order(
+    order_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user),
+):
+    """【消費者】取消訂單（僅限 pending 狀態）"""
+    order = db.query(models.Order).filter(models.Order.id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    if order.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Access denied")
+    if order.status != "pending":
+        raise HTTPException(
+            status_code=400,
+            detail=f"Cannot cancel order with status '{order.status}'. Only 'pending' orders can be cancelled."
+        )
+    order.status = "cancelled"
+    db.commit()
+
+
 @router.put("/{order_id}/status", response_model=schemas.OrderResponse)
 def update_order_status(
     order_id: int,

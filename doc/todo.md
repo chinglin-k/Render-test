@@ -46,18 +46,18 @@
 
 | 狀態 | 優先級 | 功能 | 說明 |
 |------|--------|------|------|
-| Todo | P1 | 消費者取消訂單 | 僅限 `pending` 狀態可取消 |
-| Todo | P1 | `.env` 環境變數管理 | 建立 `.env.example`，.env 加入 .gitignore |
-| Todo | P1 | 數字精度修正 | `price` 改為 `NUMERIC(10,2)` 避免浮點誤差 |
-| Todo | P1 | Alembic 資料庫遷移 | 取代手動 DROP TABLE，支援 Schema 升版 |
-| Todo | P2 | 餐廳/餐點圖片上傳 | 整合 Cloudinary 或 S3 |
-| Todo | P2 | 訂單評價功能 | 完成訂單後可評分 |
-| Todo | P2 | 使用者帳號停用 | `is_active` 欄位 + admin 停用功能 |
-| Todo | P2 | 推播通知 | WebSocket 或 FCM 即時狀態更新 |
-| Todo | P2 | 餐點搜尋 & 篩選 | 關鍵字搜尋、分類篩選 |
-| Todo | P2 | 優惠券 / 折扣系統 | coupon code 折抵 |
-| Todo | P2 | React 前端 | 消費者點餐介面 |
-| Todo | P2 | 單元測試 & 整合測試 | pytest + httpx，參考 test-plan.md |
+| ✅ Done | P1 | 消費者取消訂單 | `DELETE /orders/{id}`，僅限 `pending` 狀態 |
+| ✅ Done | P1 | `.env` 環境變數管理 | `.env.example` 已建立，`.env` 加入 `.gitignore` |
+| ✅ Done | P1 | 數字精度修正 | `migration.sql` 提供，文件已說明（需手動遷移）|
+| ⏭️ Phase 3 | P1 | Alembic 資料庫遷移 | 規模較大，獨立規劃為 Phase 3 |
+| ⏭️ Phase 3 | P2 | 餐廳/餐點圖片上傳 | 需 Cloudinary/S3 帳號，獨立規劃 |
+| ✅ Done | P2 | 訂單評價功能 | `POST /reviews`、`GET /restaurants/{id}/reviews` |
+| ✅ Done | P2 | 使用者帳號停用 | `is_active` 欄位 + `PUT /admin/users/{id}/deactivate` |
+| ⏭️ Phase 3 | P2 | 推播通知 | WebSocket/FCM，需獨立基礎設施 |
+| ✅ Done | P2 | 餐點搜尋 & 篩選 | `GET /restaurants?search=`、`GET /restaurants/{id}/menu?search=&category_id=` |
+| ✅ Done | P2 | 優惠券 / 折扣系統 | `POST /admin/coupons`、`GET /coupons/validate/{code}` |
+| ⏭️ Phase 3 | P2 | React 前端 | 獨立前端專案，Phase 3 規劃 |
+| ✅ Done | P2 | 單元測試 & 整合測試 | `tests/` 目錄，pytest + SQLite in-memory，15 個測試案例 |
 
 ---
 
@@ -65,5 +65,5 @@
 
 - 購物車是否需限制只能有單一餐廳品項？
 - 餐點是否需要圖片欄位（`image_url`）？
-- 使用者是否需要停用機制（`is_active`）？
 - 是否需要 Refresh Token 機制？
+- 優惠券是否需要與訂單金額整合（需 `orders.discount_amount` 欄位遷移）？
