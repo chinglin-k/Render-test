@@ -1,6 +1,16 @@
 services:
   - type: web
-    name: hello-api
+    name: book-crud-api
     runtime: python
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: book-db
+          property: connectionString
+
+databases:
+  - name: book-db
+    databaseName: bookdb
+    user: bookuser
