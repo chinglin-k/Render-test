@@ -33,6 +33,11 @@ class Token(BaseModel):
     user: UserResponse
 
 
+class AddRoleRequest(BaseModel):
+    role: str
+
+
+
 # ─── Restaurant ──────────────────────────────────────────────────────────────
 
 class RestaurantCreate(BaseModel):

@@ -70,6 +70,17 @@ export async function register(name, email, password, phone, role) {
   });
 }
 
+export async function getMe() {
+  return apiFetch('/auth/me');
+}
+
+export async function addMyRole(role) {
+  return apiFetch('/auth/me/add-role', {
+    method: 'PUT',
+    body: JSON.stringify({ role }),
+  });
+}
+
 export async function login(email, password) {
   const form = new FormData();
   form.append('username', email);

@@ -24,12 +24,12 @@ def seed_data():
             db.rollback()
 
         # 建立測試 admin 帳號（若已存在但非 admin，強制升級）
-        test_user = db.query(models.User).filter(models.User.email == "test").first()
+        test_user = db.query(models.User).filter(models.User.email == "admin").first()
         if not test_user:
             db.add(models.User(
-                name="Test Admin",
-                email="test",
-                password_hash=hash_password("test"),
+                name="Admin",
+                email="admin",
+                password_hash=hash_password("admin"),
                 role="admin",
                 phone="0900000000",
             ))
@@ -37,7 +37,7 @@ def seed_data():
         elif test_user.role != "admin":
             # 若帳號已存在但不是 admin，強制升級
             test_user.role = "admin"
-            test_user.name = "Test Admin"
+            test_user.name = "Admin"
             db.commit()
 
         # 建立範例餐廳
