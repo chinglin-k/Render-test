@@ -271,7 +271,6 @@ export default function LoginPage({ onLogin }) {
                   >
                     <option value="consumer">消費者 (Consumer)</option>
                     <option value="restaurant">餐廳端 (Restaurant)</option>
-                    <option value="admin">管理員 (Admin)</option>
                   </select>
                 </div>
                 <button className="login-btn" type="submit" disabled={loading}>

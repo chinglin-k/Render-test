@@ -5,7 +5,7 @@
 // 正式環境：VITE_API_BASE 指向 Render 後端
 // ============================================
 
-const API_BASE = import.meta.env.VITE_API_BASE || '';
+const API_BASE = import.meta.env.VITE_API_BASE || 'https://render-test-ae9w.onrender.com';
 
 // ---------- Token / User helpers ----------
 

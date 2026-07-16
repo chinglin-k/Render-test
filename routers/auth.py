@@ -17,7 +17,7 @@ def register(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    role = user_in.role if user_in.role in ("consumer", "restaurant", "admin") else "consumer"
+    role = user_in.role if user_in.role in ("consumer", "restaurant") else "consumer"
     user = models.User(
         name=user_in.name,
         email=user_in.email,
