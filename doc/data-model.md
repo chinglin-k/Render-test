@@ -12,13 +12,16 @@ erDiagram
     USERS ||--o| CARTS : "擁有一個"
     USERS ||--o{ ORDERS : "建立多筆"
     USERS ||--o{ RESTAURANTS : "管理多間"
+    USERS ||--o{ REVIEWS : "撰寫多則評價"
     RESTAURANTS ||--o{ CATEGORIES : "包含多個分類"
     RESTAURANTS ||--o{ MENU_ITEMS : "提供多個餐點"
     RESTAURANTS ||--o{ ORDERS : "接收多筆訂單"
+    RESTAURANTS ||--o{ REVIEWS : "被評價"
     CATEGORIES ||--o{ MENU_ITEMS : "分類多個餐點"
     CARTS ||--o{ CART_ITEMS : "包含多個品項"
     MENU_ITEMS ||--o{ CART_ITEMS : "被加入購物車"
     ORDERS ||--o{ ORDER_ITEMS : "包含多個訂單項目"
+    ORDERS ||--o| REVIEWS : "對應一則評價"
     MENU_ITEMS ||--o{ ORDER_ITEMS : "被訂購"
 ```
 
@@ -184,6 +187,8 @@ erDiagram
 | `cart_items` | `cart_id` | 購物車品項查詢 |
 | `orders` | `user_id`、`restaurant_id`、`status` | 訂單查詢與狀態篩選 |
 | `order_items` | `order_id` | 訂單詳情查詢 |
+| `reviews` | `restaurant_id`、`order_id` (UNIQUE) | 餐廳評價查詢、防止重複 |
+| `coupons` | `code` (UNIQUE) | 優惠券驗證查詢 |
 
 ---
 
@@ -203,22 +208,61 @@ erDiagram
 
 | 資料 | 建立時機 | 更新時機 | 刪除時機 |
 |------|---------|---------|---------|
-| `users` | 註冊 | 角色變更 | 不刪除 |
+| `users` | 註冊 | 角色變更、停用/啟用 | 不刪除 |
 | `restaurants` | 管理員建立 | 資訊更新、停用 | 軟刪除（`is_active`）|
 | `menu_items` | 管理員建立 | 資訊/價格更新 | 實際刪除或下架 |
 | `carts` | 首次加入品項 | — | 不刪除 |
 | `cart_items` | 加入購物車 | 修改數量 | 建立訂單後清空 |
-| `orders` | 從購物車下單 | 狀態更新 | 不刪除（財務保存）|
+| `orders` | 從購物車下單 | 狀態更新、取消 | 不刪除（財務保存）|
 | `order_items` | 隨訂單建立 | — | 隨訂單刪除（CASCADE）|
+| `reviews` | 消費者評價 delivered 訂單 | — | 不刪除 |
+| `coupons` | 管理員建立 | 更新折扣/停用 | 可實際刪除 |
 
 ---
 
-## 六、待確認事項
+## 六、Phase 2 新增實體
+
+### 6.1 `reviews` — 訂單評價
+
+| 欄位 | SQL 型別 | 可空 | 說明 |
+|------|---------|------|------|
+| `id` | INTEGER | NOT NULL | 主鍵 |
+| `order_id` | INTEGER | NOT NULL | FK → `orders.id`，唯一（一訂單一評價）|
+| `user_id` | INTEGER | NOT NULL | FK → `users.id` |
+| `restaurant_id` | INTEGER | NOT NULL | FK → `restaurants.id` |
+| `rating` | INTEGER | NOT NULL | 1–5 星 |
+| `comment` | TEXT | NULL | 文字評論 |
+| `created_at` | TIMESTAMPTZ | NOT NULL | 建立時間 |
+
+**唯一約束：** `order_id`（每筆訂單只能評價一次）
+**驗證規則：** `rating` 在 1–5 之間；訂單 `status` 必須為 `delivered`
+
+---
+
+### 6.2 `coupons` — 優惠券
+
+| 欄位 | SQL 型別 | 可空 | 說明 |
+|------|---------|------|------|
+| `id` | INTEGER | NOT NULL | 主鍵 |
+| `code` | VARCHAR(50) | NOT NULL | 優惠碼（唯一，大寫儲存）|
+| `description` | TEXT | NULL | 描述 |
+| `discount_type` | VARCHAR(20) | NOT NULL | `percentage` 或 `fixed` |
+| `discount_value` | FLOAT | NOT NULL | 折扣值（百分比或固定金額）|
+| `min_order_amount` | FLOAT | NOT NULL | 最低消費門檻（預設 0）|
+| `is_active` | BOOLEAN | NOT NULL | 是否啟用 |
+| `expires_at` | TIMESTAMPTZ | NULL | 到期時間（空 = 永不過期）|
+| `created_at` | TIMESTAMPTZ | NOT NULL | 建立時間 |
+
+**唯一約束：** `code`
+**驗證規則：** `discount_value > 0`；`discount_type` 僅允許 `percentage` / `fixed`
+
+---
+
+## 七、待確認事項
 
 > ⚠️ 以下項目尚未確認業務規則，實作前須釐清：
 
 1. **購物車跨餐廳限制**：目前允許混合多間餐廳的品項於同一購物車，建立訂單時自動分組。是否需要限制同一次只能向一間餐廳訂購？
-2. **訂單刪除政策**：訂單目前不刪除。是否需要提供消費者取消訂單功能（僅限 `pending` 狀態）？
-3. **餐點圖片欄位**：目前 `menu_items` 未包含圖片 URL。是否需要新增 `image_url` 欄位？
-4. **`price` 型別**：目前使用 `Float`（SQLAlchemy），建議正式環境改用 `NUMERIC(10,2)` 避免浮點誤差。
-5. **使用者帳號停用**：目前無停用使用者機制，是否需要 `is_active` 欄位於 `users`？
+2. **餐點圖片欄位**：目前 `menu_items` 未包含圖片 URL。是否需要新增 `image_url` 欄位？
+3. **`price` 型別**：目前使用 `Float`（SQLAlchemy），建議正式環境改用 `NUMERIC(10,2)` 避免浮點誤差。
+4. **優惠券訂單整合**：目前僅提供驗證 API，是否需要在建立訂單時自動折抵？（需新增 `orders.discount_amount`）

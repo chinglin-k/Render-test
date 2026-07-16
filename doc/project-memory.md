@@ -90,6 +90,66 @@
 |------|------|
 | 不得硬編碼敏感資訊 | `SECRET_KEY`、`DATABASE_URL` 等一律環境變數 |
 | `price` 精度問題 | 目前使用 `Float`，建議未來改為 `NUMERIC(10,2)` |
-| 無 Alembic 遷移 | Schema 變更需手動處理，MVP 後導入 |
+| 無 Alembic 遷移 | Schema 變更需手動處理（提供 `migration.sql`）|
 | 無 Refresh Token | JWT 過期後需重新登入 |
-| 無圖片上傳功能 | MVP 不含餐廳/餐點圖片，Phase 2 規劃 |
+| 無圖片上傳功能 | Phase 3 規劃 |
+| 優惠券尚未整合訂單金額 | 目前僅提供驗證端點，未自動折抵 |
+
+---
+
+## Phase 2 決策記錄
+
+### [2026-07-16] 密碼雜湊：bcrypt 直接呼叫取代 passlib
+
+**決策：** 移除 passlib，改用 `bcrypt` 套件直接呼叫 `hashpw` / `checkpw`。
+
+**原因：** passlib 與 bcrypt >= 4.1 存在相容性問題（`__about__` attribute 移除、72 byte 密碼限制），導致測試失敗。直接使用 bcrypt 更穩定。
+
+**影響範圍：** `dependencies.py`、`requirements.txt`
+
+---
+
+### [2026-07-16] 本地開發/測試資料庫：SQLite fallback
+
+**決策：** 當 `DATABASE_URL` 環境變數未設定時，自動 fallback 至 `sqlite:///./local_dev.db`。
+
+**原因：** 讓本地開發和 pytest 可以無需 PostgreSQL 即可執行。正式環境（Render）仍透過 `DATABASE_URL` 使用 PostgreSQL。
+
+**影響範圍：** `database.py`
+
+---
+
+### [2026-07-16] 消費者取消訂單：僅限 pending 狀態
+
+**決策：** 消費者可透過 `DELETE /orders/{id}` 取消訂單，但僅限 `status = "pending"` 的訂單。取消後 status 改為 `"cancelled"`，訂單本身保留不刪除。
+
+**原因：** 一旦餐廳確認接單，消費者不應單方面取消。
+
+**影響範圍：** `routers/orders.py`
+
+---
+
+### [2026-07-16] 訂單評價：一訂單一評價
+
+**決策：** 每筆訂單只能評價一次（`reviews.order_id` 設為 UNIQUE），且僅限 `delivered` 狀態的訂單可評價。Rating 為 1–5 星。
+
+**影響範圍：** `models.py`（Review）、`routers/reviews.py`
+
+---
+
+### [2026-07-16] 使用者停用機制
+
+**決策：** `users` 表新增 `is_active` 欄位（Boolean, 預設 TRUE）。停用的帳號在 `get_current_user` 中會被攔截（403），但保留帳號資料不刪除。
+
+**影響範圍：** `models.py`、`dependencies.py`、`routers/admin.py`、`migration.sql`
+
+---
+
+### [2026-07-16] 優惠券系統：驗證分離、管理集中
+
+**決策：** 優惠券驗證端點公開（免登入），管理 CRUD 由 admin 管理。code 統一轉大寫儲存。支援 `percentage`（百分比）和 `fixed`（固定金額）兩種折扣類型。
+
+**限制：** 目前僅提供驗證 API，尚未與訂單建立流程整合自動折抵。
+
+**影響範圍：** `models.py`（Coupon）、`routers/coupons.py`、`routers/admin.py`
+
