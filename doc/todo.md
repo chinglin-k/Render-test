@@ -56,8 +56,21 @@
 | ⏭️ Phase 3 | P2 | 推播通知 | WebSocket/FCM，需獨立基礎設施 |
 | ✅ Done | P2 | 餐點搜尋 & 篩選 | `GET /restaurants?search=`、`GET /restaurants/{id}/menu?search=&category_id=` |
 | ✅ Done | P2 | 優惠券 / 折扣系統 | `POST /admin/coupons`、`GET /coupons/validate/{code}` |
-| ⏭️ Phase 3 | P2 | React 前端 | 獨立前端專案，Phase 3 規劃 |
+| ✅ Done | P2 | React 前端 | 6 頁面 Django 風格 SPA，部署至 GitHub Pages |
 | ✅ Done | P2 | 單元測試 & 整合測試 | `tests/` 目錄，pytest + SQLite in-memory，15 個測試案例 |
+
+---
+
+## Phase 2.5 — 前端 & 部署
+
+| 狀態 | 功能 | 說明 |
+|------|------|------|
+| ✅ Done | React 前端（Django 風格） | Vite + React 18，6 頁面，Django Admin 風格設計 |
+| ✅ Done | GitHub Pages 部署 | GitHub Actions 自動 build + deploy |
+| ✅ Done | CORS 設定 | FastAPI middleware 允許跨域 |
+| ✅ Done | 測試帳號 + 種子資料 | user=test/password=test（admin），3 餐廳 + 12 餐點 |
+| ✅ Done | API 路徑修正 | api.js 所有端點路徑對齊後端 |
+| ✅ Done | SPA Routing | 404.html fallback + index.html redirect handler |
 
 ---
 
@@ -67,3 +80,4 @@
 - 餐點是否需要圖片欄位（`image_url`）？
 - 是否需要 Refresh Token 機制？
 - 優惠券是否需要與訂單金額整合（需 `orders.discount_amount` 欄位遷移）？
+

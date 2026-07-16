@@ -35,26 +35,29 @@ function App() {
 
   return (
     <>
+      {/* Django-style navbar */}
       <nav className="navbar">
-        <Link to="/" className="nav-brand">🍜 餐點外送</Link>
-        <div className="nav-links">
-          <Link to="/" className="nav-link">餐廳</Link>
-          {user ? (
-            <>
-              <Link to="/cart" className="nav-link">
-                🛒 購物車
-                {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
-              </Link>
-              <Link to="/orders" className="nav-link">📋 訂單</Link>
-              {user.role === 'admin' && (
-                <Link to="/admin" className="nav-link">⚙️ 管理</Link>
-              )}
-              <span className="nav-user">👤 {user.name}</span>
-              <button className="btn btn-sm" onClick={handleLogout}>登出</button>
-            </>
-          ) : (
-            <Link to="/login" className="nav-link">登入</Link>
-          )}
+        <div className="navbar-inner">
+          <Link to="/" className="nav-brand">🍜 餐點外送系統</Link>
+          <div className="nav-links">
+            <Link to="/" className="nav-link">餐廳列表</Link>
+            {user ? (
+              <>
+                <Link to="/cart" className="nav-link">
+                  🛒 購物車
+                  {cartCount > 0 && <span className="cart-badge">{cartCount}</span>}
+                </Link>
+                <Link to="/orders" className="nav-link">📋 訂單</Link>
+                {user.role === 'admin' && (
+                  <Link to="/admin" className="nav-link">⚙️ 管理後台</Link>
+                )}
+                <span className="nav-user">歡迎，{user.name}</span>
+                <button className="btn btn-sm btn-logout" onClick={handleLogout}>登出</button>
+              </>
+            ) : (
+              <Link to="/login" className="nav-link">登入 / 註冊</Link>
+            )}
+          </div>
         </div>
       </nav>
 
@@ -68,6 +71,10 @@ function App() {
           <Route path="/admin" element={<AdminPage />} />
         </Routes>
       </main>
+
+      <footer className="footer">
+        <p>© 2026 餐點外送系統 — Powered by FastAPI + React</p>
+      </footer>
     </>
   )
 }

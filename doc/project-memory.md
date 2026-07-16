@@ -153,3 +153,46 @@
 
 **影響範圍：** `models.py`（Coupon）、`routers/coupons.py`、`routers/admin.py`
 
+---
+
+### [2026-07-16] 前端框架：React + Vite，Django Admin 風格
+
+**決策：** 使用 React 18 + Vite 建立 SPA 前端，設計風格參考 Django Admin（淺色主題、#417690 header、#79aec8 module headers、clean tables）。
+
+**原因：** 使用者指定參考 Django 風格，Vite 提供快速開發體驗。
+
+**影響範圍：** `frontend/` 目錄全部
+
+---
+
+### [2026-07-16] 前端部署：GitHub Pages + GitHub Actions
+
+**決策：** 前端部署至 GitHub Pages（`https://chinglin-k.github.io/Render-test/`），後端維持 Render。透過 GitHub Actions 自動 build + deploy。
+
+**原因：** GitHub Pages 免費、穩定、與 repo 整合方便。SPA routing 透過 404.html redirect 解決。
+
+**影響範圍：** `.github/workflows/deploy-pages.yml`、`frontend/vite.config.js`（base path）、`frontend/public/404.html`
+
+**注意：** 前端透過 `VITE_API_BASE` 環境變數連接 Render 後端，build 時注入。
+
+---
+
+### [2026-07-16] 測試帳號與種子資料
+
+**決策：** 應用啟動時自動建立測試 admin 帳號（email=test, password=test）和範例資料（3 間餐廳、12 道餐點、2 張優惠券）。僅在資料不存在時建立。
+
+**原因：** 方便開發測試和展示，不會覆蓋已有資料。
+
+**影響範圍：** `main.py`（lifespan seed_data）
+
+---
+
+### [2026-07-16] CORS 設定：允許所有來源
+
+**決策：** FastAPI 加入 CORSMiddleware，allow_origins=["*"]。
+
+**原因：** GitHub Pages 前端需要跨域存取 Render 後端 API。
+
+**限制：** 正式上線應限縮 allow_origins 為 GitHub Pages 域名。
+
+**影響範圍：** `main.py`
