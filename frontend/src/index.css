@@ -1,5 +1,5 @@
-/* ============================================
-   Design System — Django Admin Inspired
+﻿/* ============================================
+   Design System ??Django Admin Inspired
    Clean, professional, light theme
    ============================================ */
 
@@ -99,7 +99,7 @@ ul, ol {
 }
 
 /* ============================================
-   2. Navbar — Django-style top bar
+   2. Navbar ??Django-style top bar
    ============================================ */
 .navbar {
   position: fixed;
@@ -211,7 +211,7 @@ ul, ol {
 }
 
 /* ============================================
-   4. Page Title — Django h1 with colored underline
+   4. Page Title ??Django h1 with colored underline
    ============================================ */
 .page-title {
   font-size: 1.75rem;
@@ -269,7 +269,7 @@ ul, ol {
 }
 
 /* ============================================
-   7. Module — Django module block
+   7. Module ??Django module block
    ============================================ */
 .module {
   border: 1px solid var(--border);
@@ -329,7 +329,7 @@ ul, ol {
   transform: none;
 }
 
-/* Primary — Django header teal */
+/* Primary ??Django header teal */
 .btn-primary {
   background-color: var(--primary);
   color: #fff;
@@ -342,7 +342,7 @@ ul, ol {
   color: #fff;
 }
 
-/* Success — green action */
+/* Success ??green action */
 .btn-success {
   background-color: var(--accent);
   color: #fff;
@@ -945,7 +945,7 @@ ul, ol {
 }
 
 /* ============================================
-   23. Stat Card — admin dashboard
+   23. Stat Card ??admin dashboard
    ============================================ */
 .stat-card {
   background: var(--bg-white);
@@ -1230,7 +1230,7 @@ ul, ol {
   text-align: left;
 }
 
-/* Margins — top */
+/* Margins ??top */
 .mt-1 {
   margin-top: 8px;
 }
@@ -1247,7 +1247,7 @@ ul, ol {
   margin-top: 32px;
 }
 
-/* Margins — bottom */
+/* Margins ??bottom */
 .mb-1 {
   margin-bottom: 8px;
 }
@@ -1371,5 +1371,4 @@ ul, ol {
 ::-webkit-scrollbar-thumb:hover {
   background-color: var(--text-light);
 }
-/ *   F o o d   D e l i v e r y   F r o n t e n d   * /  
- 
+
