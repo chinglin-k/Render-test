@@ -1,16 +1,18 @@
 services:
   - type: web
-    name: book-crud-api
+    name: food-delivery-api
     runtime: python
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: DATABASE_URL
         fromDatabase:
-          name: book-db
+          name: food-delivery-db
           property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
 
 databases:
-  - name: book-db
-    databaseName: bookdb
-    user: bookuser
+  - name: food-delivery-db
+    databaseName: fooddelivery
+    user: fooddeliveryuser
