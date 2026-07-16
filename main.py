@@ -1,69 +1,28 @@
-from fastapi import FastAPI, Depends, HTTPException
-from sqlalchemy.orm import Session
-from typing import List
+from fastapi import FastAPI
 
+from database import engine
 import models
-import schemas
-from database import engine, get_db
+from routers import auth, restaurants, cart, orders, admin
 
-# 啟動時自動建立資料表
+# 啟動時自動建立所有資料表
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="Book CRUD API")
+app = FastAPI(
+    title="餐點外送系統 API",
+    version="1.0.0",
+    description="消費者點餐、購物車、訂單管理、餐廳端與管理後台的完整 REST API",
+)
 
 
-# ── Hello ─────────────────────────────────────────────────
-@app.get("/")
+# ── 健康檢查 ──────────────────────────────────────────────
+@app.get("/", tags=["Health"])
 def hello():
-    return {"message": "Hello"}
+    return {"message": "Hello from Food Delivery API 🍜"}
 
 
-# ── Create ────────────────────────────────────────────────
-@app.post("/books", response_model=schemas.BookResponse, status_code=201)
-def create_book(book: schemas.BookCreate, db: Session = Depends(get_db)):
-    db_book = models.Book(**book.model_dump())
-    db.add(db_book)
-    db.commit()
-    db.refresh(db_book)
-    return db_book
-
-
-# ── Read All ──────────────────────────────────────────────
-@app.get("/books", response_model=List[schemas.BookResponse])
-def list_books(db: Session = Depends(get_db)):
-    return db.query(models.Book).all()
-
-
-# ── Read One ──────────────────────────────────────────────
-@app.get("/books/{book_id}", response_model=schemas.BookResponse)
-def get_book(book_id: int, db: Session = Depends(get_db)):
-    book = db.query(models.Book).filter(models.Book.id == book_id).first()
-    if not book:
-        raise HTTPException(status_code=404, detail="Book not found")
-    return book
-
-
-# ── Update ────────────────────────────────────────────────
-@app.put("/books/{book_id}", response_model=schemas.BookResponse)
-def update_book(book_id: int, book_data: schemas.BookUpdate, db: Session = Depends(get_db)):
-    book = db.query(models.Book).filter(models.Book.id == book_id).first()
-    if not book:
-        raise HTTPException(status_code=404, detail="Book not found")
-
-    update_fields = book_data.model_dump(exclude_unset=True)
-    for field, value in update_fields.items():
-        setattr(book, field, value)
-
-    db.commit()
-    db.refresh(book)
-    return book
-
-
-# ── Delete ────────────────────────────────────────────────
-@app.delete("/books/{book_id}", status_code=204)
-def delete_book(book_id: int, db: Session = Depends(get_db)):
-    book = db.query(models.Book).filter(models.Book.id == book_id).first()
-    if not book:
-        raise HTTPException(status_code=404, detail="Book not found")
-    db.delete(book)
-    db.commit()
+# ── 路由掛載 ──────────────────────────────────────────────
+app.include_router(auth.router)
+app.include_router(restaurants.router)
+app.include_router(cart.router)
+app.include_router(orders.router)
+app.include_router(admin.router)
