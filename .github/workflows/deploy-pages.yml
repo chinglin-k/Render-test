@@ -36,7 +36,7 @@ jobs:
       - name: Build
         working-directory: frontend
         env:
-          VITE_API_BASE: https://book-crud-api.onrender.com
+          VITE_API_BASE: https://render-test-ae9w.onrender.com
         run: npm run build
 
       - name: Setup Pages
