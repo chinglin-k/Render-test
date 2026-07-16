@@ -13,6 +13,16 @@ def seed_data():
     """啟動時自動建立測試帳號與範例資料（若不存在）"""
     db = SessionLocal()
     try:
+        # 自動遷移：嘗試新增 is_active 欄位（針對已有資料庫的情境）
+        from sqlalchemy import text
+        try:
+            # SQLite 不支援 IF NOT EXISTS 於 ADD COLUMN，但我們能靠 catch 捕捉錯誤
+            # 若是 PostgreSQL 則會正常執行
+            db.execute(text("ALTER TABLE users ADD COLUMN is_active BOOLEAN NOT NULL DEFAULT TRUE"))
+            db.commit()
+        except Exception:
+            db.rollback()
+
         # 建立測試 admin 帳號
         if not db.query(models.User).filter(models.User.email == "test").first():
             db.add(models.User(
